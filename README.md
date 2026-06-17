@@ -14,7 +14,7 @@ A lightweight REST API that shortens long URLs and redirects users to the origin
 ## Running it locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/url-shortener-api.git
+git clone https://github.com/SassySasquatsch/url-shortener-api.git
 cd url-shortener-api
 python -m venv venv
 source venv/bin/activate
