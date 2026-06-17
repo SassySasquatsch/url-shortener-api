@@ -30,3 +30,5 @@ App runs at `http://127.0.0.1:8000`. Interactive docs at `http://127.0.0.1:8000/
 | POST | `/shorten` | Takes a long URL, returns a short code |
 | GET | `/{short_code}` | Redirects to the original URL |
 | GET | `/stats/{short_code}` | Returns click count and metadata for a short code |
+
+![Swagger demo](swagger-demo.png)
