@@ -28,6 +28,7 @@ def generate_code(length=6):
 
 class URLRequest(BaseModel):
     url: HttpUrl
+    custom_code: str | None = None
 
 class URLResponse(BaseModel):
     short_code: str
@@ -40,13 +41,17 @@ def startup():
 
 @app.post("/shorten", response_model=URLResponse)
 def shorten_url(request: URLRequest):
-    code = generate_code()
+    code =request.custom_code if request.custom_code else generate_code()
     original = str(request.url)
 
     with get_db() as conn:
         # avoid collision
-        while conn.execute("SELECT 1 FROM urls WHERE short_code=?", (code,)).fetchone():
-            code = generate_code()
+        if request.custom_code:
+            if conn.execute("SELECT 1 FROM urls WHERE short_code=?", (code,)).fetchone():
+                raise HTTPException(status_code=409, detail="Custom code already taken")
+        else:
+            while conn.execute("SELECT 1 FROM urls WHERE short_code=?", (code,)).fetchone():
+                code = generate_code()
         conn.execute("INSERT INTO urls (short_code, original_url) VALUES (?, ?)", (code, original))
 
     return URLResponse(
@@ -62,6 +67,7 @@ def redirect(short_code: str):
         if not row:
             raise HTTPException(status_code=404, detail="Short URL not found")
         conn.execute("UPDATE urls SET clicks = clicks + 1 WHERE short_code=?", (short_code,))
+        
     return RedirectResponse(url=row["original_url"], status_code=301)
 
 @app.get("/stats/{short_code}")
